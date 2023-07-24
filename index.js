@@ -29,6 +29,22 @@ async function run() {
         await client.connect();
         const collegesCollection = client.db("College-Quest-Hub").collection("colleges")
         const admissionCollection = client.db("College-Quest-Hub").collection("admission")
+        const reviewsCollection = client.db("College-Quest-Hub").collection("reviews")
+
+
+        // search text
+        const indexKeys = { name: 1 };
+        const indexOptions = { name: "name" };
+        const result = await collegesCollection.createIndex(indexKeys, indexOptions);
+
+        app.get("/collegeSearch/:text", async (req, res) => {
+            const text = req.params.text
+            const result = await collegesCollection.find({
+                $or: [{ name: { $regex: text, $options: "i" } }]
+            }).toArray()
+            res.send(result)
+        })
+
 
 
         // all colleges
@@ -37,6 +53,8 @@ async function run() {
             const result = await cursor.toArray()
             res.send(result)
         })
+
+
 
         // college details
         app.get("/colleges/:id", async (req, res) => {
@@ -47,7 +65,7 @@ async function run() {
         })
 
 
-
+        // admission
         app.post("/admission", async (req, res) => {
             const admission = req.body
             const result = await admissionCollection.insertOne(admission)
@@ -61,8 +79,18 @@ async function run() {
             res.send(result)
         })
 
+        // review
+        app.post("/review", async (req, res) => {
+            const review = req.body
+            const result = await reviewsCollection.insertOne(review)
+            res.send(result)
+        })
 
-
+        app.get("/review", async (req, res) => {
+            const cursor = reviewsCollection.find()
+            const result = await cursor.toArray()
+            res.send(result)
+        })
 
 
         // Send a ping to confirm a successful connection
