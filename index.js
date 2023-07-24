@@ -28,6 +28,7 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
         const collegesCollection = client.db("College-Quest-Hub").collection("colleges")
+        const admissionCollection = client.db("College-Quest-Hub").collection("admission")
 
 
         // all colleges
@@ -47,7 +48,18 @@ async function run() {
 
 
 
+        app.post("/admission", async (req, res) => {
+            const admission = req.body
+            const result = await admissionCollection.insertOne(admission)
+            res.send(result)
+        })
 
+
+        // my college data
+        app.get("/admission/:email", async (req, res) => {
+            const result = await admissionCollection.find({ email: req.params.email }).toArray()
+            res.send(result)
+        })
 
 
 
